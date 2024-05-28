@@ -6,7 +6,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
@@ -28,9 +27,6 @@ class BotController {
         this.botService = botService
     }
 
-    @Value("\${serverVerification.code}")
-    lateinit var serverVerificationCode: String
-
     @PostMapping("/callback")
     fun verifyServer(@RequestBody body: String): ResponseEntity<String> {
         val objectMapper = jacksonObjectMapper()
@@ -45,7 +41,7 @@ class BotController {
 
         return try {
             if (eventDto.type == "message_new") {
-                val message = eventDto.`object`?.message
+                val message = eventDto.`object`.message
                 if (message != null) {
                     logger.info("New message: $message")
                     botService.repeatText(message)
@@ -55,11 +51,8 @@ class BotController {
             }
             ResponseEntity.status(HttpStatus.OK).body("ok")
         } catch (e: RuntimeException) {
-            logger.error("Error repeating message: ${eventDto.`object`?.message}", e)
+            logger.error("Error repeating message: ${eventDto.`object`.message}", e)
             ResponseEntity.status(HttpStatus.OK).body("ok")
         }
-
     }
-
-
 }
